@@ -20,12 +20,12 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-white text-slate-800">
+<body class="bg-gray-50 text-slate-800">
 
     <div id="root"></div>
 
@@ -84,6 +84,53 @@
         // 🔴 END USER SETTINGS - DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW CODE
         // ==================================================================================
 
+        // Utility function to extract and group topics for the outline
+        const getOutline = (data) => {
+            const outline = {
+                Marketing: new Set(),
+                "E-commerce": new Set(),
+                AI: new Set(),
+            };
+
+            data.forEach(item => {
+                if (item.medium.includes("Marketing")) {
+                    outline.Marketing.add(item.topic);
+                }
+                if (item.medium.includes("eCommerce")) {
+                    outline["E-commerce"].add(item.topic);
+                }
+                if (item.medium.includes("Artificial Intelligence")) {
+                    outline.AI.add(item.topic);
+                }
+            });
+
+            return {
+                Marketing: Array.from(outline.Marketing).sort(),
+                "E-commerce": Array.from(outline["E-commerce"]).sort(),
+                AI: Array.from(outline.AI).sort(),
+            };
+        };
+
+        const CourseOutline = ({ outline }) => (
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 mt-16">
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-8 pb-3 border-b border-slate-200">
+                    Detailed Course Outline
+                </h2>
+                <div className="grid md:grid-cols-3 gap-8">
+                    {Object.entries(outline).map(([category, topics], index) => (
+                        <div key={index} className="bg-white p-6 rounded-xl border border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <h3 className="text-xl font-extrabold mb-4 text-slate-900 border-b-2 border-slate-100 pb-2">{category}</h3>
+                            <ul className="list-disc pl-5 space-y-3 text-sm text-slate-700">
+                                {topics.map((topic, i) => (
+                                    <li key={i} className="leading-relaxed">{topic}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
         const Tag = ({ text }) => {
             let colors = "bg-gray-100 text-gray-700";
             
@@ -123,17 +170,25 @@
             const completedClasses = scheduleData.filter(i => i.status.toLowerCase() === "completed").length;
             const progress = Math.round((completedClasses / totalClasses) * 100);
 
+            // Calculate Outline Data
+            const courseOutlineData = getOutline(scheduleData);
+
             return (
                 <div className="min-h-screen pb-20">
                     
                     {/* Header Section */}
-                    <div className="bg-white border-b border-gray-100 sticky top-0 z-10 bg-opacity-90 backdrop-blur-md">
+                    <div className="bg-white border-b border-gray-100 sticky top-0 z-10 bg-opacity-95 backdrop-blur-sm shadow-sm">
                         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
                             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Class Schedule</h1>
                             <p className="text-slate-500 text-sm mb-6">Marketing & eCommerce Masterclass • December Batch 2025</p>
+
+                            {/* NEW: Start Date Notification */}
+                            <div className="mb-6 text-center py-2 px-4 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-sm">
+                                🚀 Classes start from **Wednesday**. Be sure to check your local time!
+                            </div>
                             
                             {/* Progress Bar */}
-                            <div className="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 shadow-inner">
                                 <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
                                     <span>Course Progress</span>
                                     <span>{progress}% ({completedClasses}/{totalClasses})</span>
@@ -168,7 +223,7 @@
                                     key={index}
                                     className={`
                                         group relative bg-white border rounded-lg p-4 transition-all duration-200 hover:shadow-md
-                                        md:grid md:grid-cols-12 md:gap-4 md:items-center md:py-3 md:px-4 md:rounded-md
+                                        md:grid md:grid-cols-12 md:gap-4 md:items-center md:py-3 md:px-4 md:rounded-xl
                                         ${isCompleted ? 'border-slate-100 opacity-75 hover:opacity-100' : 'border-slate-200'}
                                     `}
                                 >
@@ -176,7 +231,7 @@
                                     <div className="md:col-span-5 mb-3 md:mb-0">
                                         <div className="flex justify-between items-start md:block">
                                             <div className="flex items-center gap-3">
-                                                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded bg-slate-50 text-slate-400 text-xs font-mono">
+                                                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-mono border border-slate-200">
                                                     {index + 1}
                                                 </span>
                                                 <h3 className={`text-sm font-medium ${isCompleted ? 'text-slate-500 line-through decoration-slate-300' : 'text-slate-800'}`}>
@@ -215,6 +270,9 @@
                             );
                         })}
                     </div>
+
+                    {/* NEW: Course Outline Section */}
+                    <CourseOutline outline={courseOutlineData} />
 
                     <div className="max-w-5xl mx-auto px-6 mt-12 text-center">
                         <p className="text-slate-300 text-xs">Developed for Netlify Deployment</p>
